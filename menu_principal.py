@@ -1,32 +1,20 @@
 import tkinter as tk
 from tkinter import messagebox
 
-from Login import Login
-from clientes import Clientes
-from vehiculos import Vehiculos
+class MenuPrincipal(tk.Frame):
+    def __init__(self, root, main_app):
+        super().__init__(root, bg="#212F3D")
+        self.main_app = main_app
+        self.menu_lateral_abierto = True
 
-class MenuPrincipal:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Menú Principal - Taller Mecánico")
-        self.root.geometry("950x600")
-        self.root.config(bg="#1C2833")
-        self.root.resizable(False, False)
+        # --- Botón toggle del menú ---
+        self.boton_toggle = tk.Button(self, text="☰", font=("Arial", 14, "bold"),
+                                      bg="#1ABC9C", fg="white", width=3,
+                                      command=self.toggle)
+        self.boton_toggle.pack(pady=10)
 
-        # --- Título del sistema ---
-        titulo = tk.Label(self.root, text="SISTEMA DE GESTIÓN - TALLER MECÁNICO",
-                          font=("Arial", 18, "bold"), bg="#1C2833", fg="#1ABC9C")
-        titulo.pack(pady=15)
-
-        # --- Marco principal ---
-        frame = tk.Frame(self.root, bg="#212F3D", bd=2, relief="ridge")
-        frame.pack(fill="both", expand=True, padx=20, pady=10)
-
-        # --- Sección de botones (menú) ---
-        tk.Label(frame, text="Módulos del Sistema", font=("Arial", 14, "bold"),
-                 bg="#212F3D", fg="white").pack(pady=10)
-
-        botones = [
+        # --- Botones del menú ---
+        self.botones = [
             ("Clientes", self.abrir_clientes),
             ("Vehículos", self.abrir_vehiculos),
             ("Inventario", self.abrir_inventario),
@@ -38,56 +26,50 @@ class MenuPrincipal:
             ("Cerrar Sesión", self.cerrar_sesion)
         ]
 
-        for texto, comando in botones:
-            boton = tk.Button(frame, text=texto, font=("Arial", 12, "bold"),
-                              bg="#1ABC9C", fg="white", width=25, height=2,
-                              command=comando, relief="ridge", cursor="hand2")
-            boton.pack(pady=8)
+        self.botones_widgets = []
+        for texto, comando in self.botones:
+            b = tk.Button(self, text=texto, font=("Arial", 12, "bold"),
+                          bg="#1ABC9C", fg="white", width=20, height=2,
+                          command=comando, relief="raised", cursor="hand2",
+                          activebackground="#117A65", activeforeground="white")
+            b.pack(pady=5)
+            self.botones_widgets.append(b)
 
-        # --- Información inferior ---
-        tk.Label(self.root, text="© 2025 Taller Mecánico - Sistema POS",
-                 font=("Arial", 9), bg="#1C2833", fg="gray").pack(side="bottom", pady=5)
+    # ---------- Método toggle público ----------
+    def toggle(self):
+        if self.menu_lateral_abierto:
+            self.pack_forget()
+            self.menu_lateral_abierto = False
+        else:
+            self.pack(side="left", fill="y")
+            self.menu_lateral_abierto = True
 
-    # ---------- Funciones para abrir pantallas (a crear después) ----------
+    # ---------- Funciones de navegación ----------
     def abrir_clientes(self):
-
-     nueva_ventana = tk.Toplevel(self.root)
-     Clientes(nueva_ventana)
+        self.main_app.cambiar_pantalla("clientes")
 
     def abrir_vehiculos(self):
-      nueva_ventana = tk.Toplevel(self.root)
-      Vehiculos(nueva_ventana)
+        self.main_app.cambiar_pantalla("vehiculos")
 
     def abrir_inventario(self):
-        messagebox.showinfo("Inventario", "Aquí se mostrará el inventario de refacciones")
+        self.main_app.cambiar_pantalla("inventario")
 
     def abrir_ordenes(self):
-        messagebox.showinfo("Órdenes", "Aquí se registrarán las órdenes de servicio")
+        self.main_app.cambiar_pantalla("ordenes")
 
     def abrir_facturacion(self):
-        messagebox.showinfo("Facturación", "Aquí se generarán las facturas de servicios")
+        self.main_app.cambiar_pantalla("facturacion")
 
     def abrir_citas(self):
-        messagebox.showinfo("Citas", "Aquí se agendarán citas y servicios")
+        self.main_app.cambiar_pantalla("citas")
 
     def abrir_reportes(self):
-        messagebox.showinfo("Reportes", "Aquí se mostrarán reportes de ventas y servicios")
+        self.main_app.cambiar_pantalla("reportes")
 
     def abrir_configuracion(self):
-        messagebox.showinfo("Configuración", "Aquí podrás cambiar datos de usuario o contraseña")
+        self.main_app.cambiar_pantalla("configuracion")
 
     def cerrar_sesion(self):
         confirmacion = messagebox.askyesno("Cerrar sesión", "¿Deseas cerrar sesión?")
         if confirmacion:
-            self.root.destroy()
-          #  from login import Login
-            nuevo_root = tk.Tk()
-            Login(nuevo_root)
-            nuevo_root.mainloop()
-
-
-# --- PRUEBA DIRECTA ---
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = MenuPrincipal(root)
-    root.mainloop()
+            self.main_app.cerrar_sesion()

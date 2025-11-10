@@ -2,13 +2,11 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
 
-class Vehiculos:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Gestión de Vehículos - Taller Mecánico")
-        self.root.geometry("900x550")
-        self.root.config(bg="#17202A")
-        self.root.resizable(False, False)
+class Vehiculos(tk.Frame):
+    def __init__(self, parent, main_app):
+        super().__init__(parent)
+        self.main_app = main_app
+        self.pack(fill="both", expand=True)
 
         # --- Conexión a la base de datos ---
         self.conexion = sqlite3.connect("taller_mecanico.db")
@@ -16,11 +14,11 @@ class Vehiculos:
         self.crear_tabla_vehiculos()
 
         # --- Título ---
-        tk.Label(self.root, text="Registro de Vehículos", font=("Arial", 18, "bold"),
+        tk.Label(self, text="Registro de Vehículos", font=("Arial", 18, "bold"),
                  bg="#17202A", fg="#1ABC9C").pack(pady=10)
 
         # --- Marco del formulario ---
-        frame_form = tk.Frame(self.root, bg="#1C2833", bd=2, relief="ridge")
+        frame_form = tk.Frame(self, bg="#1C2833", bd=2, relief="ridge")
         frame_form.pack(padx=10, pady=10, fill="x")
 
         # --- Campos del formulario ---
@@ -54,13 +52,12 @@ class Vehiculos:
                   command=self.mostrar_vehiculos).grid(row=5, column=2, padx=10, pady=10)
 
         # --- Tabla de vehículos ---
-        self.tabla = ttk.Treeview(self.root, columns=("ID", "Cliente", "Marca", "Modelo", "Año", "Placas"), show="headings", height=10)
+        self.tabla = ttk.Treeview(self, columns=("ID", "Cliente", "Marca", "Modelo", "Año", "Placas"), show="headings", height=10)
         self.tabla.pack(padx=15, pady=10, fill="x")
 
         for col in ("ID", "Cliente", "Marca", "Modelo", "Año", "Placas"):
             self.tabla.heading(col, text=col)
             self.tabla.column(col, width=120)
-
         self.tabla.column("ID", width=50)
         self.mostrar_vehiculos()
 
@@ -97,11 +94,9 @@ class Vehiculos:
             return
 
         id_cliente = self.lista_clientes.get(cliente_nombre)
-
         self.cursor.execute("INSERT INTO vehiculos (id_cliente, marca, modelo, anio, placas) VALUES (?, ?, ?, ?, ?)",
                             (id_cliente, marca, modelo, anio, placas))
         self.conexion.commit()
-
         messagebox.showinfo("Éxito", "Vehículo registrado correctamente")
         self.limpiar_campos()
         self.mostrar_vehiculos()
@@ -137,10 +132,3 @@ class Vehiculos:
         self.anio_entry.delete(0, tk.END)
         self.placas_entry.delete(0, tk.END)
         self.cliente_cb.set("")
-
-
-# --- PRUEBA DIRECTA ---
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = Vehiculos(root)
-    root.mainloop()

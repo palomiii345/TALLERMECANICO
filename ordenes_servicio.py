@@ -2,13 +2,11 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
 
-class OrdenesServicio:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Órdenes de Servicio - Taller Mecánico")
-        self.root.geometry("1000x650")
-        self.root.config(bg="#1C2833")
-        self.root.resizable(False, False)
+class OrdenesServicio(tk.Frame):
+    def __init__(self, parent, main_app):
+        super().__init__(parent)
+        self.main_app = main_app
+        self.pack(fill="both", expand=True)
 
         # --- Conexión con base de datos ---
         self.conexion = sqlite3.connect("taller_mecanico.db")
@@ -16,11 +14,11 @@ class OrdenesServicio:
         self.crear_tabla_ordenes()
 
         # --- Título principal ---
-        tk.Label(self.root, text="GESTIÓN DE ÓRDENES DE SERVICIO",
+        tk.Label(self, text="GESTIÓN DE ÓRDENES DE SERVICIO",
                  font=("Arial", 18, "bold"), bg="#1C2833", fg="#1ABC9C").pack(pady=15)
 
         # --- Marco principal ---
-        frame = tk.Frame(self.root, bg="#212F3D", bd=2, relief="ridge")
+        frame = tk.Frame(self, bg="#212F3D", bd=2, relief="ridge")
         frame.pack(fill="both", expand=True, padx=20, pady=10)
 
         # --- Variables ---
@@ -61,7 +59,6 @@ class OrdenesServicio:
             ("Actualizar", self.actualizar_orden),
             ("Eliminar", self.eliminar_orden),
             ("Limpiar", self.limpiar_campos),
-            ("Regresar", self.volver_menu)
         ]
 
         for texto, comando in botones:
@@ -80,7 +77,7 @@ class OrdenesServicio:
 
         self.cargar_ordenes()
 
-    # ---------------------- BASE DE DATOS ----------------------
+    # --- Funciones de base de datos ---
     def crear_tabla_ordenes(self):
         self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS ordenes_servicio (
@@ -154,7 +151,6 @@ class OrdenesServicio:
         if confirm:
             self.cursor.execute("DELETE FROM ordenes_servicio WHERE id=?", (id_orden,))
             self.conexion.commit()
-            messagebox.showinfo("Eliminado", "Orden eliminada correctamente")
             self.cargar_ordenes()
             self.limpiar_campos()
 
@@ -166,17 +162,3 @@ class OrdenesServicio:
         self.costo.set(0)
         self.estado.set("Pendiente")
         self.tabla.selection_remove(self.tabla.focus())
-
-    def volver_menu(self):
-        self.root.destroy()
-        from menu_principal import MenuPrincipal
-        nuevo_root = tk.Tk()
-        MenuPrincipal(nuevo_root)
-        nuevo_root.mainloop()
-
-
-# --- PRUEBA DIRECTA ---
-if __name__ == "__main__":
-    root = tk.Tk()
-    OrdenesServicio(root)
-    root.mainloop()

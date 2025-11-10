@@ -2,13 +2,11 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
 
-class Clientes:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Registro de Clientes - Taller Mecánico")
-        self.root.geometry("950x600")
-        self.root.config(bg="#1C2833")
-        self.root.resizable(False, False)
+class Clientes(tk.Frame):
+    def __init__(self, parent, main_app):
+        super().__init__(parent, bg="#1C2833")
+        self.main_app = main_app
+        self.pack(fill="both", expand=True)
 
         # --- Conexión con la base de datos ---
         self.conexion = sqlite3.connect("taller_mecanico.db")
@@ -16,11 +14,11 @@ class Clientes:
         self.crear_tabla_clientes()
 
         # --- Título principal ---
-        tk.Label(self.root, text="REGISTRO DE CLIENTES",
+        tk.Label(self, text="REGISTRO DE CLIENTES",
                  font=("Arial", 18, "bold"), bg="#1C2833", fg="#1ABC9C").pack(pady=15)
 
         # --- Marco principal ---
-        frame = tk.Frame(self.root, bg="#212F3D", bd=2, relief="ridge")
+        frame = tk.Frame(self, bg="#212F3D", bd=2, relief="ridge")
         frame.pack(fill="both", expand=True, padx=20, pady=10)
 
         # --- Variables ---
@@ -55,7 +53,7 @@ class Clientes:
             ("Actualizar", self.actualizar_cliente),
             ("Eliminar", self.eliminar_cliente),
             ("Limpiar", self.limpiar_campos),
-            ("Regresar", self.volver_menu)
+            ("Volver al Menú", self.volver_menu)
         ]
 
         for texto, comando in botones:
@@ -155,15 +153,4 @@ class Clientes:
         self.tabla.selection_remove(self.tabla.focus())
 
     def volver_menu(self):
-        self.root.destroy()
-        from menu_principal import MenuPrincipal
-        nuevo_root = tk.Tk()
-        MenuPrincipal(nuevo_root)
-        nuevo_root.mainloop()
-
-
-# --- PRUEBA DIRECTA ---
-if __name__ == "__main__":
-    root = tk.Tk()
-    Clientes(root)
-    root.mainloop()
+        self.main_app.cambiar_pantalla("menu")
