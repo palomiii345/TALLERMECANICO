@@ -96,6 +96,11 @@ class Inventario(tk.Frame):
         """, (self.nombre.get(), self.categoria.get(), self.precio.get(), self.stock.get(), self.descripcion.get()))
         self.conexion.commit()
         messagebox.showinfo("Éxito", "Producto agregado correctamente")
+
+        # --- Notificación si el stock es bajo ---
+        if self.stock.get() < 5:
+            messagebox.showwarning("Stock Bajo", "⚠️ Este producto tiene poco stock.")
+
         self.cargar_productos()
         self.limpiar_campos()
 
@@ -103,8 +108,22 @@ class Inventario(tk.Frame):
         for row in self.tabla.get_children():
             self.tabla.delete(row)
         self.cursor.execute("SELECT * FROM inventario")
-        for producto in self.cursor.fetchall():
-            self.tabla.insert("", "end", values=producto)
+        productos = self.cursor.fetchall()
+
+        # --- Configurar colores ---
+        self.tabla.tag_configure('bajo', background='#F1948A')  # rojo claro
+        self.tabla.tag_configure('normal', background='#ABEBC6')  # verde claro
+
+        # --- Insertar productos ---
+        for producto in productos:
+            tag = 'bajo' if producto[4] < 5 else 'normal'
+            self.tabla.insert("", "end", values=producto, tags=(tag,))
+
+        # --- Mostrar advertencia si hay productos con bajo stock ---
+        productos_bajos = [p for p in productos if p[4] < 5]
+        if productos_bajos:
+            nombres = ", ".join([p[1] for p in productos_bajos])
+            messagebox.showwarning("Stock Bajo", f"Los siguientes productos tienen poco stock:\n{nombres}")
 
     def seleccionar_producto(self, event):
         fila = self.tabla.focus()
@@ -128,6 +147,11 @@ class Inventario(tk.Frame):
         """, (self.nombre.get(), self.categoria.get(), self.precio.get(), self.stock.get(), self.descripcion.get(), id_producto))
         self.conexion.commit()
         messagebox.showinfo("Actualizado", "Producto actualizado correctamente")
+
+        # --- Verificar stock bajo al actualizar ---
+        if self.stock.get() < 5:
+            messagebox.showwarning("Stock Bajo", "⚠️ Este producto tiene poco stock.")
+
         self.cargar_productos()
         self.limpiar_campos()
 
