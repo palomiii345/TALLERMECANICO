@@ -19,7 +19,7 @@ class MainApp:
         self.root.state("zoomed")
 
         # ==============================
-        # 🎨 Configuración del tema global
+        #  Configuración del tema global
         # ==============================
         self.config_color_fondo = "#1C2833"      # Fondo oscuro
         self.config_color_secundario = "#212F3D" # Paneles oscuros
