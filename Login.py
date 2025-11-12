@@ -36,9 +36,6 @@ class Login(tk.Frame):
         frame.pack(padx=40, pady=20)
 
         # --- Campo Usuario ---
-        
-        tk.Label(frame, text="Oli:", font=("Arial", 12, "bold"),
-                 bg="#2E4053", fg="white").pack(pady=(15, 5))
         tk.Label(frame, text="Usuario:", font=("Arial", 12, "bold"),
                  bg="#2E4053", fg="white").pack(pady=(15, 5))
         self.usuario_entry = tk.Entry(frame, font=("Arial", 12), width=25)

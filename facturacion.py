@@ -2,71 +2,103 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
 
-class Facturacion:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Facturación - Taller Mecánico")
-        self.root.geometry("950x600")
-        self.root.config(bg="#1C2833")
-        self.root.resizable(False, False)
 
-        # --- Título ---
-        titulo = tk.Label(self.root, text="FACTURACIÓN DE SERVICIOS",
-                          font=("Arial", 18, "bold"), bg="#1C2833", fg="#1ABC9C")
-        titulo.pack(pady=15)
+class Facturacion(tk.Frame):
+    def __init__(self, parent, main_app=None):
+        super().__init__(parent, bg="#1C2833")
+        self.main_app = main_app
 
-        # --- Frame principal ---
-        frame = tk.Frame(self.root, bg="#212F3D", bd=2, relief="ridge")
-        frame.pack(padx=20, pady=10, fill="both", expand=True)
+        # --- COLORES GLOBALES ---
+        color_fondo = "#1C2833"
+        color_secundario = "#212F3D"
+        color_boton = "#1ABC9C"
+        color_texto = "white"
 
-        # --- Variables ---
+        # --- TÍTULO ---
+        tk.Label(self, text="FACTURACIÓN DE SERVICIOS",
+                 font=("Arial", 18, "bold"),
+                 bg=color_fondo, fg=color_boton).pack(pady=15)
+
+        # --- FRAME PRINCIPAL ---
+        frame = tk.Frame(self, bg=color_secundario, bd=2, relief="ridge")
+        frame.pack(fill="both", expand=True, padx=20, pady=10)
+
+        # --- VARIABLES ---
         self.id_orden = tk.StringVar()
         self.cliente = tk.StringVar()
         self.total = tk.StringVar()
-        self.metodo_pago = tk.StringVar()
+        self.metodo_pago = tk.StringVar(value="Efectivo")
 
-        # --- Conexión inicial ---
+        # --- CONEXIÓN A BD ---
         self.crear_tabla()
 
-        # --- Formulario ---
-        tk.Label(frame, text="ID Orden:", font=("Arial", 12, "bold"), bg="#212F3D", fg="white").grid(row=0, column=0, padx=10, pady=10, sticky="w")
-        tk.Entry(frame, textvariable=self.id_orden, width=30).grid(row=0, column=1, padx=10, pady=10)
+        # --- FORMULARIO ---
+        campos = [
+            ("ID Orden:", self.id_orden),
+            ("Cliente:", self.cliente),
+            ("Total a Pagar ($):", self.total)
+        ]
 
-        tk.Label(frame, text="Cliente:", font=("Arial", 12, "bold"), bg="#212F3D", fg="white").grid(row=1, column=0, padx=10, pady=10, sticky="w")
-        tk.Entry(frame, textvariable=self.cliente, width=30).grid(row=1, column=1, padx=10, pady=10)
+        for i, (texto, var) in enumerate(campos):
+            tk.Label(frame, text=texto, font=("Arial", 12, "bold"),
+                     bg=color_secundario, fg=color_texto).grid(row=i, column=0, padx=10, pady=10, sticky="w")
+            tk.Entry(frame, textvariable=var, font=("Arial", 12),
+                     width=30, bg="#566573", fg="white",
+                     insertbackground="white", relief="flat").grid(row=i, column=1, padx=10, pady=10)
 
-        tk.Label(frame, text="Total a Pagar ($):", font=("Arial", 12, "bold"), bg="#212F3D", fg="white").grid(row=2, column=0, padx=10, pady=10, sticky="w")
-        tk.Entry(frame, textvariable=self.total, width=30).grid(row=2, column=1, padx=10, pady=10)
-
-        tk.Label(frame, text="Método de Pago:", font=("Arial", 12, "bold"), bg="#212F3D", fg="white").grid(row=3, column=0, padx=10, pady=10, sticky="w")
-        combo_metodo = ttk.Combobox(frame, textvariable=self.metodo_pago, values=["Efectivo", "Tarjeta", "Transferencia"], state="readonly", width=28)
+        # --- MÉTODO DE PAGO ---
+        tk.Label(frame, text="Método de Pago:", font=("Arial", 12, "bold"),
+                 bg=color_secundario, fg=color_texto).grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        combo_metodo = ttk.Combobox(frame, textvariable=self.metodo_pago,
+                                    values=["Efectivo", "Tarjeta", "Transferencia"],
+                                    state="readonly", width=28)
         combo_metodo.grid(row=3, column=1, padx=10, pady=10)
         combo_metodo.current(0)
 
-        # --- Botones ---
-        tk.Button(frame, text="Registrar Factura", command=self.registrar_factura,
-                  bg="#1ABC9C", fg="white", font=("Arial", 12, "bold"), width=20).grid(row=4, column=0, padx=10, pady=15)
+        # --- BOTONES ---
+        boton_frame = tk.Frame(frame, bg=color_secundario)
+        boton_frame.grid(row=4, column=0, columnspan=2, pady=15)
 
-        tk.Button(frame, text="Mostrar Facturas", command=self.mostrar_facturas,
-                  bg="#117A65", fg="white", font=("Arial", 12, "bold"), width=20).grid(row=4, column=1, padx=10, pady=15)
+        tk.Button(boton_frame, text="Registrar Factura", command=self.registrar_factura,
+                  bg=color_boton, fg="white", font=("Arial", 12, "bold"),
+                  width=18, cursor="hand2", relief="flat").pack(side="left", padx=10)
 
-        # --- Tabla de facturas ---
-        self.tabla = ttk.Treeview(frame, columns=("id", "orden", "cliente", "total", "pago"), show="headings", height=10)
-        self.tabla.grid(row=5, column=0, columnspan=4, padx=20, pady=10)
+        tk.Button(boton_frame, text="Mostrar Facturas", command=self.mostrar_facturas,
+                  bg="#117A65", fg="white", font=("Arial", 12, "bold"),
+                  width=18, cursor="hand2", relief="flat").pack(side="left", padx=10)
 
-        self.tabla.heading("id", text="ID")
-        self.tabla.heading("orden", text="ID Orden")
-        self.tabla.heading("cliente", text="Cliente")
-        self.tabla.heading("total", text="Total ($)")
-        self.tabla.heading("pago", text="Método de Pago")
+        # --- TABLA ---
+        columnas = ("id", "orden", "cliente", "total", "pago")
+        self.tabla = ttk.Treeview(frame, columns=columnas, show="headings", height=10)
+        self.tabla.grid(row=5, column=0, columnspan=4, padx=20, pady=15, sticky="nsew")
 
-        self.tabla.column("id", width=50)
-        self.tabla.column("orden", width=120)
-        self.tabla.column("cliente", width=200)
-        self.tabla.column("total", width=120)
-        self.tabla.column("pago", width=150)
+        for col, texto in zip(columnas, ["ID", "ID Orden", "Cliente", "Total ($)", "Método de Pago"]):
+            self.tabla.heading(col, text=texto)
+            self.tabla.column(col, width=150, anchor="center")
 
-    # --- Crear tabla ---
+        # --- ESTILO TREEVIEW OSCURO ---
+        estilo = ttk.Style()
+        estilo.configure("Treeview",
+                         background=color_fondo,
+                         foreground="white",
+                         rowheight=25,
+                         fieldbackground=color_fondo,
+                         font=("Arial", 10))
+        estilo.configure("Treeview.Heading",
+                         background=color_boton,
+                         foreground=color_fondo,
+                         font=("Arial", 11, "bold"))
+        estilo.map("Treeview",
+                   background=[("selected", "#117A65")])
+
+        # --- CARGAR DATOS ---
+        self.mostrar_facturas()
+
+        # Expandir filas/columnas
+        frame.rowconfigure(5, weight=1)
+        frame.columnconfigure(1, weight=1)
+
+    # ---------------- FUNCIONES BD ----------------
     def crear_tabla(self):
         conn = sqlite3.connect("taller_mecanico.db")
         cursor = conn.cursor()
@@ -82,7 +114,6 @@ class Facturacion:
         conn.commit()
         conn.close()
 
-    # --- Registrar Factura ---
     def registrar_factura(self):
         if not self.id_orden.get() or not self.cliente.get() or not self.total.get():
             messagebox.showerror("Error", "Todos los campos son obligatorios")
@@ -91,19 +122,19 @@ class Facturacion:
         try:
             conn = sqlite3.connect("taller_mecanico.db")
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO facturas (id_orden, cliente, total, metodo_pago) VALUES (?, ?, ?, ?)", 
-                           (self.id_orden.get(), self.cliente.get(), float(self.total.get()), self.metodo_pago.get()))
+            cursor.execute("""
+                INSERT INTO facturas (id_orden, cliente, total, metodo_pago)
+                VALUES (?, ?, ?, ?)
+            """, (self.id_orden.get(), self.cliente.get(), float(self.total.get()), self.metodo_pago.get()))
             conn.commit()
             conn.close()
 
             messagebox.showinfo("Éxito", "Factura registrada correctamente")
             self.mostrar_facturas()
             self.limpiar_campos()
-
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo registrar la factura: {e}")
 
-    # --- Mostrar Facturas ---
     def mostrar_facturas(self):
         for fila in self.tabla.get_children():
             self.tabla.delete(fila)
@@ -115,7 +146,6 @@ class Facturacion:
             self.tabla.insert("", "end", values=fila)
         conn.close()
 
-    # --- Limpiar campos ---
     def limpiar_campos(self):
         self.id_orden.set("")
         self.cliente.set("")
@@ -123,8 +153,11 @@ class Facturacion:
         self.metodo_pago.set("Efectivo")
 
 
-# --- PRUEBA DIRECTA ---
+# --- PRUEBA INDEPENDIENTE ---
 if __name__ == "__main__":
     root = tk.Tk()
+    root.title("Facturación - Prueba independiente")
+    root.geometry("950x600")
     app = Facturacion(root)
+    app.pack(fill="both", expand=True)
     root.mainloop()
