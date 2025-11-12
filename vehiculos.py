@@ -7,6 +7,7 @@ class Vehiculos(tk.Frame):
         super().__init__(parent)
         self.main_app = main_app
         self.pack(fill="both", expand=True)
+        self.config(bg="#1C2833")
 
         # --- Conexión a la base de datos ---
         self.conexion = sqlite3.connect("taller_mecanico.db")
@@ -14,51 +15,64 @@ class Vehiculos(tk.Frame):
         self.crear_tabla_vehiculos()
 
         # --- Título ---
-        tk.Label(self, text="Registro de Vehículos", font=("Arial", 18, "bold"),
-                 bg="#17202A", fg="#1ABC9C").pack(pady=10)
+        tk.Label(self, text="GESTIÓN DE VEHÍCULOS", font=("Arial", 18, "bold"),
+                 bg="#1C2833", fg="#1ABC9C").pack(pady=15)
 
         # --- Marco del formulario ---
-        frame_form = tk.Frame(self, bg="#1C2833", bd=2, relief="ridge")
-        frame_form.pack(padx=10, pady=10, fill="x")
+        frame_form = tk.Frame(self, bg="#212F3D", bd=2, relief="ridge")
+        frame_form.pack(padx=20, pady=10, fill="x")
 
         # --- Campos del formulario ---
-        tk.Label(frame_form, text="Cliente:", bg="#1C2833", fg="white", font=("Arial", 11)).grid(row=0, column=0, padx=10, pady=5, sticky="w")
-        self.cliente_cb = ttk.Combobox(frame_form, width=27, state="readonly", font=("Arial", 11))
-        self.cliente_cb.grid(row=0, column=1, padx=10, pady=5)
+        etiquetas = ["Cliente:", "Marca:", "Modelo:", "Año:", "Placas:"]
+        for i, texto in enumerate(etiquetas):
+            tk.Label(frame_form, text=texto, bg="#212F3D", fg="white",
+                     font=("Arial", 12, "bold")).grid(row=i, column=0, padx=10, pady=8, sticky="w")
+
+        # --- Combobox de clientes ---
+        self.cliente_cb = ttk.Combobox(frame_form, width=28, state="readonly", font=("Arial", 11))
+        self.cliente_cb.grid(row=0, column=1, padx=10, pady=8)
         self.cargar_clientes()
 
-        tk.Label(frame_form, text="Marca:", bg="#1C2833", fg="white", font=("Arial", 11)).grid(row=1, column=0, padx=10, pady=5, sticky="w")
+        # --- Entradas ---
         self.marca_entry = tk.Entry(frame_form, font=("Arial", 11), width=30)
-        self.marca_entry.grid(row=1, column=1, padx=10, pady=5)
+        self.marca_entry.grid(row=1, column=1, padx=10, pady=8)
 
-        tk.Label(frame_form, text="Modelo:", bg="#1C2833", fg="white", font=("Arial", 11)).grid(row=2, column=0, padx=10, pady=5, sticky="w")
         self.modelo_entry = tk.Entry(frame_form, font=("Arial", 11), width=30)
-        self.modelo_entry.grid(row=2, column=1, padx=10, pady=5)
+        self.modelo_entry.grid(row=2, column=1, padx=10, pady=8)
 
-        tk.Label(frame_form, text="Año:", bg="#1C2833", fg="white", font=("Arial", 11)).grid(row=3, column=0, padx=10, pady=5, sticky="w")
         self.anio_entry = tk.Entry(frame_form, font=("Arial", 11), width=30)
-        self.anio_entry.grid(row=3, column=1, padx=10, pady=5)
+        self.anio_entry.grid(row=3, column=1, padx=10, pady=8)
 
-        tk.Label(frame_form, text="Placas:", bg="#1C2833", fg="white", font=("Arial", 11)).grid(row=4, column=0, padx=10, pady=5, sticky="w")
         self.placas_entry = tk.Entry(frame_form, font=("Arial", 11), width=30)
-        self.placas_entry.grid(row=4, column=1, padx=10, pady=5)
+        self.placas_entry.grid(row=4, column=1, padx=10, pady=8)
 
         # --- Botones ---
-        tk.Button(frame_form, text="Registrar", bg="#1ABC9C", fg="white", font=("Arial", 11, "bold"),
-                  command=self.registrar_vehiculo).grid(row=5, column=0, padx=10, pady=10)
-        tk.Button(frame_form, text="Eliminar", bg="#E74C3C", fg="white", font=("Arial", 11, "bold"),
-                  command=self.eliminar_vehiculo).grid(row=5, column=1, padx=10, pady=10)
-        tk.Button(frame_form, text="Actualizar lista", bg="#5DADE2", fg="white", font=("Arial", 11, "bold"),
-                  command=self.mostrar_vehiculos).grid(row=5, column=2, padx=10, pady=10)
+        boton_frame = tk.Frame(frame_form, bg="#212F3D")
+        boton_frame.grid(row=5, column=0, columnspan=2, pady=10)
+
+        botones = [
+            ("Registrar", self.registrar_vehiculo, "#1ABC9C"),
+            ("Eliminar", self.eliminar_vehiculo, "#922B21"),
+            ("Actualizar Lista", self.mostrar_vehiculos, "#117A65")
+        ]
+
+        for texto, comando, color in botones:
+            tk.Button(boton_frame, text=texto, command=comando,
+                      bg=color, fg="white", font=("Arial", 12, "bold"),
+                      width=16, cursor="hand2").pack(side="left", padx=10)
 
         # --- Tabla de vehículos ---
-        self.tabla = ttk.Treeview(self, columns=("ID", "Cliente", "Marca", "Modelo", "Año", "Placas"), show="headings", height=10)
-        self.tabla.pack(padx=15, pady=10, fill="x")
+        tabla_frame = tk.Frame(self, bg="#1C2833")
+        tabla_frame.pack(padx=20, pady=15, fill="both", expand=True)
+
+        self.tabla = ttk.Treeview(tabla_frame, columns=("ID", "Cliente", "Marca", "Modelo", "Año", "Placas"),
+                                  show="headings", height=12)
+        self.tabla.pack(fill="both", expand=True)
 
         for col in ("ID", "Cliente", "Marca", "Modelo", "Año", "Placas"):
             self.tabla.heading(col, text=col)
-            self.tabla.column(col, width=120)
-        self.tabla.column("ID", width=50)
+            self.tabla.column(col, width=120 if col != "ID" else 50)
+
         self.mostrar_vehiculos()
 
     # --- Funciones de base de datos ---

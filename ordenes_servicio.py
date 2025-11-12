@@ -4,21 +4,24 @@ import sqlite3
 
 class OrdenesServicio(tk.Frame):
     def __init__(self, parent, main_app):
-        super().__init__(parent)
+        super().__init__(parent, bg=main_app.config_color_fondo)
         self.main_app = main_app
         self.pack(fill="both", expand=True)
 
-        # --- Conexión con base de datos ---
+        # Conexión a la base
         self.conexion = sqlite3.connect("taller_mecanico.db")
         self.cursor = self.conexion.cursor()
         self.crear_tabla_ordenes()
 
-        # --- Título principal ---
-        tk.Label(self, text="GESTIÓN DE ÓRDENES DE SERVICIO",
-                 font=("Arial", 18, "bold"), bg="#1C2833", fg="#1ABC9C").pack(pady=15)
+        # --- Título ---
+        tk.Label(
+            self, text="GESTIÓN DE ÓRDENES DE SERVICIO",
+            font=("Arial", 18, "bold"),
+            bg=main_app.config_color_fondo, fg=main_app.config_color_boton
+        ).pack(pady=15)
 
         # --- Marco principal ---
-        frame = tk.Frame(self, bg="#212F3D", bd=2, relief="ridge")
+        frame = tk.Frame(self, bg="#1C2833", bd=2, relief="ridge")
         frame.pack(fill="both", expand=True, padx=20, pady=10)
 
         # --- Variables ---
@@ -29,55 +32,56 @@ class OrdenesServicio(tk.Frame):
         self.costo = tk.DoubleVar()
         self.estado = tk.StringVar(value="Pendiente")
 
-        # --- Campos de texto y combos ---
-        tk.Label(frame, text="Cliente (ID):", font=("Arial", 12), bg="#212F3D", fg="white").grid(row=0, column=0, padx=10, pady=8, sticky="w")
-        tk.Entry(frame, textvariable=self.id_cliente, font=("Arial", 12), width=25).grid(row=0, column=1, padx=10, pady=8)
-
-        tk.Label(frame, text="Vehículo (ID):", font=("Arial", 12), bg="#212F3D", fg="white").grid(row=0, column=2, padx=10, pady=8, sticky="w")
-        tk.Entry(frame, textvariable=self.id_vehiculo, font=("Arial", 12), width=25).grid(row=0, column=3, padx=10, pady=8)
-
-        tk.Label(frame, text="Descripción del trabajo:", font=("Arial", 12), bg="#212F3D", fg="white").grid(row=1, column=0, padx=10, pady=8, sticky="w")
-        tk.Entry(frame, textvariable=self.descripcion, font=("Arial", 12), width=60).grid(row=1, column=1, columnspan=3, padx=10, pady=8)
-
-        tk.Label(frame, text="Piezas usadas:", font=("Arial", 12), bg="#212F3D", fg="white").grid(row=2, column=0, padx=10, pady=8, sticky="w")
-        tk.Entry(frame, textvariable=self.piezas_usadas, font=("Arial", 12), width=60).grid(row=2, column=1, columnspan=3, padx=10, pady=8)
-
-        tk.Label(frame, text="Costo total ($):", font=("Arial", 12), bg="#212F3D", fg="white").grid(row=3, column=0, padx=10, pady=8, sticky="w")
-        tk.Entry(frame, textvariable=self.costo, font=("Arial", 12), width=25).grid(row=3, column=1, padx=10, pady=8)
-
-        tk.Label(frame, text="Estado:", font=("Arial", 12), bg="#212F3D", fg="white").grid(row=3, column=2, padx=10, pady=8, sticky="w")
-        estado_combo = ttk.Combobox(frame, textvariable=self.estado, font=("Arial", 12), width=23, state="readonly",
-                                    values=["Pendiente", "En proceso", "Completado"])
-        estado_combo.grid(row=3, column=3, padx=10, pady=8)
-
-        # --- Botones ---
-        boton_frame = tk.Frame(frame, bg="#212F3D")
-        boton_frame.grid(row=4, column=0, columnspan=4, pady=10)
-
-        botones = [
-            ("Guardar", self.guardar_orden),
-            ("Actualizar", self.actualizar_orden),
-            ("Eliminar", self.eliminar_orden),
-            ("Limpiar", self.limpiar_campos),
+        # --- Campos ---
+        campos = [
+            ("Cliente (ID):", self.id_cliente),
+            ("Vehículo (ID):", self.id_vehiculo),
+            ("Descripción del trabajo:", self.descripcion),
+            ("Piezas usadas:", self.piezas_usadas),
+            ("Costo total ($):", self.costo),
         ]
 
-        for texto, comando in botones:
-            tk.Button(boton_frame, text=texto, font=("Arial", 12, "bold"),
-                      bg="#1ABC9C", fg="white", width=12, command=comando,
-                      cursor="hand2").pack(side="left", padx=10)
+        for i, (texto, variable) in enumerate(campos):
+            tk.Label(frame, text=texto, font=("Arial", 11),
+                     bg="#1C2833", fg=main_app.config_color_boton).grid(row=i, column=0, padx=10, pady=8, sticky="w")
+            tk.Entry(frame, textvariable=variable, font=("Arial", 11), width=30).grid(row=i, column=1, padx=10, pady=8)
 
-        # --- Tabla de órdenes ---
+        # --- Estado ---
+        tk.Label(frame, text="Estado:", font=("Arial", 11),
+                 bg="#1C2833", fg=main_app.config_color_boton).grid(row=4, column=2, padx=10, pady=8, sticky="w")
+
+        estado_combo = ttk.Combobox(frame, textvariable=self.estado, font=("Arial", 11), width=23, state="readonly",
+                                    values=["Pendiente", "En proceso", "Completado"])
+        estado_combo.grid(row=4, column=3, padx=10, pady=8)
+
+        # --- Botones ---
+        boton_frame = tk.Frame(frame, bg="#1C2833")
+        boton_frame.grid(row=5, column=0, columnspan=4, pady=10)
+
+        botones = [
+            ("Guardar", self.guardar_orden, main_app.config_color_boton),
+            ("Actualizar", self.actualizar_orden, main_app.config_color_boton),
+            ("Eliminar", self.eliminar_orden, "#E74C3C"),
+            ("Limpiar", self.limpiar_campos, main_app.config_color_boton),
+        ]
+
+        for texto, comando, color in botones:
+            tk.Button(boton_frame, text=texto, font=("Arial", 12, "bold"),
+                      bg=color, fg="white", width=12, command=comando,
+                      cursor="hand2", activebackground="#117A65").pack(side="left", padx=10)
+
+        # --- Tabla ---
         columnas = ("ID", "Cliente", "Vehículo", "Descripción", "Piezas", "Costo", "Estado")
         self.tabla = ttk.Treeview(frame, columns=columnas, show="headings", height=12)
         for col in columnas:
             self.tabla.heading(col, text=col)
             self.tabla.column(col, width=130 if col != "Descripción" else 200)
-        self.tabla.grid(row=5, column=0, columnspan=4, pady=15, padx=10)
+        self.tabla.grid(row=6, column=0, columnspan=4, pady=15, padx=10)
         self.tabla.bind("<ButtonRelease-1>", self.seleccionar_orden)
 
         self.cargar_ordenes()
 
-    # --- Funciones de base de datos ---
+    # === Funciones DB ===
     def crear_tabla_ordenes(self):
         self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS ordenes_servicio (
@@ -94,7 +98,7 @@ class OrdenesServicio(tk.Frame):
 
     def guardar_orden(self):
         if not self.id_cliente.get() or not self.descripcion.get():
-            messagebox.showwarning("Campos obligatorios", "Debe ingresar al menos el cliente y la descripción")
+            messagebox.showwarning("Campos obligatorios", "Debe ingresar cliente y descripción")
             return
         self.cursor.execute("""
         INSERT INTO ordenes_servicio (id_cliente, id_vehiculo, descripcion, piezas_usadas, costo, estado)
@@ -102,9 +106,9 @@ class OrdenesServicio(tk.Frame):
         """, (self.id_cliente.get(), self.id_vehiculo.get(), self.descripcion.get(),
               self.piezas_usadas.get(), self.costo.get(), self.estado.get()))
         self.conexion.commit()
-        messagebox.showinfo("Éxito", "Orden registrada correctamente")
         self.cargar_ordenes()
         self.limpiar_campos()
+        messagebox.showinfo("Éxito", "Orden registrada correctamente")
 
     def cargar_ordenes(self):
         for row in self.tabla.get_children():
@@ -127,7 +131,7 @@ class OrdenesServicio(tk.Frame):
     def actualizar_orden(self):
         fila = self.tabla.focus()
         if not fila:
-            messagebox.showwarning("Selecciona una orden", "Debes seleccionar una orden de la tabla")
+            messagebox.showwarning("Selecciona una orden", "Selecciona una orden de la tabla")
             return
         id_orden = self.tabla.item(fila)["values"][0]
         self.cursor.execute("""
@@ -137,14 +141,14 @@ class OrdenesServicio(tk.Frame):
         """, (self.id_cliente.get(), self.id_vehiculo.get(), self.descripcion.get(),
               self.piezas_usadas.get(), self.costo.get(), self.estado.get(), id_orden))
         self.conexion.commit()
-        messagebox.showinfo("Actualizado", "Orden actualizada correctamente")
         self.cargar_ordenes()
+        messagebox.showinfo("Actualizado", "Orden actualizada correctamente")
         self.limpiar_campos()
 
     def eliminar_orden(self):
         fila = self.tabla.focus()
         if not fila:
-            messagebox.showwarning("Selecciona una orden", "Debes seleccionar una orden de la tabla")
+            messagebox.showwarning("Selecciona una orden", "Selecciona una orden de la tabla")
             return
         id_orden = self.tabla.item(fila)["values"][0]
         confirm = messagebox.askyesno("Eliminar", "¿Deseas eliminar esta orden?")
