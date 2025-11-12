@@ -65,10 +65,10 @@ class Login(tk.Frame):
                   command=self.abrir_registro, width=25).pack(pady=(0, 15))
 
         # --- Pie de página ---
-        tk.Label(self, text="© 2025 Taller Mecánico - Sistema POS",
-                 font=("Arial", 9), bg=color_fondo, fg=color_texto).pack(side="bottom", pady=10)
+       # tk.Label(self, text=" 2025 Taller Mecánico - Sistema POS",
+               #  font=("Arial", 9), bg=color_fondo, fg=color_texto).pack(side="bottom", pady=10)
 
-        self.pack(fill="both", expand=True)
+       # self.pack(fill="both", expand=True)
 
     # ---------- FUNCIONES DE BASE DE DATOS ----------
     def crear_tabla_usuarios(self):

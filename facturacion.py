@@ -67,6 +67,10 @@ class Facturacion(tk.Frame):
                   bg="#117A65", fg="white", font=("Arial", 12, "bold"),
                   width=18, cursor="hand2", relief="flat").pack(side="left", padx=10)
 
+        tk.Button(boton_frame, text="🖨️ Imprimir Factura", command=self.imprimir_factura,
+                  bg="#F39C12", fg="white", font=("Arial", 12, "bold"),
+                  width=18, cursor="hand2", relief="flat").pack(side="left", padx=10)
+
         # --- TABLA ---
         columnas = ("id", "orden", "cliente", "total", "pago")
         self.tabla = ttk.Treeview(frame, columns=columnas, show="headings", height=10)
@@ -152,6 +156,34 @@ class Facturacion(tk.Frame):
         self.total.set("")
         self.metodo_pago.set("Efectivo")
 
+    # ---------------- BOTÓN IMPRIMIR ----------------
+    def imprimir_factura(self):
+        """Abre ventana con los datos de la factura seleccionada."""
+        seleccion = self.tabla.selection()
+        if not seleccion:
+            messagebox.showwarning("Aviso", "Selecciona una factura de la tabla")
+            return
+
+        datos = self.tabla.item(seleccion)["values"]
+
+        ventana_impresion = tk.Toplevel(self)
+        ventana_impresion.title(f"Factura ID {datos[0]}")
+        ventana_impresion.geometry("400x300")
+        ventana_impresion.config(bg="#F2F4F4")
+
+        tk.Label(ventana_impresion, text="FACTURA DE SERVICIO", font=("Arial", 16, "bold"),
+                 bg="#F2F4F4").pack(pady=10)
+
+        etiquetas = ["ID Factura:", "ID Orden:", "Cliente:", "Total ($):", "Método de Pago:"]
+        for etiqueta, valor in zip(etiquetas, datos):
+            tk.Label(ventana_impresion, text=f"{etiqueta} {valor}", font=("Arial", 12),
+                     bg="#F2F4F4").pack(anchor="w", padx=20, pady=5)
+
+        # Botón simulado de imprimir
+        tk.Button(ventana_impresion, text="Imprimir", font=("Arial", 12, "bold"),
+                  bg="#117A65", fg="white", width=15,
+                  command=lambda: messagebox.showinfo("Imprimir", "Se envió a imprimir")).pack(pady=20)
+
 
 # --- PRUEBA INDEPENDIENTE ---
 if __name__ == "__main__":
@@ -161,3 +193,4 @@ if __name__ == "__main__":
     app = Facturacion(root)
     app.pack(fill="both", expand=True)
     root.mainloop()
+
