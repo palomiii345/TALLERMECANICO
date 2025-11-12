@@ -150,7 +150,7 @@ class Inventario(tk.Frame):
 
         # --- Verificar stock bajo al actualizar ---
         if self.stock.get() < 5:
-            messagebox.showwarning("Stock Bajo", "⚠️ Este producto tiene poco stock.")
+            messagebox.showwarning("Stock Bajo", " Este producto tiene poco stock.")
 
         self.cargar_productos()
         self.limpiar_campos()
