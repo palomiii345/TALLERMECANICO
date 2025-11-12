@@ -28,6 +28,12 @@ class MainApp:
         self.config_tamano_fuente = 12
         self.config_tamano_botones = 12
 
+        # ======== NUEVAS CONFIGURACIONES ========
+        self.config_modo_oscuro = True
+        self.config_brillo = 1.0
+        self.config_contraste = 1.0
+        self.config_notificacion_modo = "sonido"  # "sonido", "vibracion", "silencio"
+
         # ==============================
         # Variables de control
         # ==============================
@@ -144,11 +150,26 @@ class MainApp:
                 self._aplicar_estilo_pantalla(widget)
 
     # ==============================
+    # Función de notificación global
+    # ==============================
+    def notificar(self, mensaje):
+        """Muestra una notificación según el modo de configuración."""
+        modo = self.config_notificacion_modo
+        if modo == "sonido":
+            print(f" Notificación: {mensaje}")
+            self.root.bell()  # reproduce sonido del sistema
+        elif modo == "vibracion":
+            print(f" Vibración simulada: {mensaje}")
+        elif modo == "silencio":
+            print(f" (Silencio) Notificación omitida: {mensaje}")
+
+    # ==============================
     # Manejo de sesión
     # ==============================
     def iniciar_sesion(self, usuario):
         self.usuario_actual = usuario
         self.cambiar_pantalla("clientes")  # pantalla inicial
+        self.notificar("Sesión iniciada correctamente")
 
     def cerrar_sesion(self):
         self.usuario_actual = None
@@ -159,6 +180,7 @@ class MainApp:
         for widget in self.frame_contenido.winfo_children():
             widget.destroy()
         self.cambiar_pantalla("Login")
+        self.notificar("Sesión cerrada correctamente")
 
 
 # ==============================
